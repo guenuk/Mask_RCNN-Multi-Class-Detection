@@ -35,7 +35,7 @@ import numpy as np
 import skimage.draw
 
 # Root directory of the project
-ROOT_DIR = os.path.abspath("/Users/guenuk/Documents/GitHub/Mask_RCNN-Multi-Class-Detection")
+ROOT_DIR = os.path.abspath("/content/Mask_RCNN-Multi-Class-Detection")
 
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)  # To find local version of the library
@@ -114,7 +114,7 @@ class ScrewDataset(utils.Dataset):
         # }
         # We mostly care about the x and y coordinates of each region
         # Note: In VIA 2.0, regions was changed from a dict to a list.
-        annotations = json.load(open(os.path.join(dataset_dir, "via_region_data.json")))
+        annotations = json.load(open(os.path.join(dataset_dir, "points.json")))
         annotations = list(annotations.values())  # don't need the dict keys
 
         # The VIA tool saves images in the JSON even if they don't have any
@@ -129,14 +129,30 @@ class ScrewDataset(utils.Dataset):
             # The if condition is needed to support VIA versions 1.x and 2.x.
             polygons = []
             objects = []
-            for r in a['regions'].values():
+            print(a['regions'])
+            for r in a['regions']:
                 polygons.append(r['shape_attributes'])
                 # print("polygons=", polygons)
                 objects.append(r['region_attributes'])
             # print("multi_numbers=", multi_numbers)
             # polygons = [r['shape_attributes'] for r in a['regions'].values()]
             # objects = [s['region_attributes'] for s in a['regions'].values()]
-            class_ids = [int(n['screw']) for n in objects]
+            print(objects)
+            print(polygons)
+            class_ids = []
+            for n in objects:
+              if n['type']=='M':
+                class_ids.append(1)
+              elif n['type']=='I':
+                class_ids.append(2)
+              elif n['type']=='N':
+                class_ids.append(3)
+              elif n['type']=='K':
+                class_ids.append(4)
+              elif n['type']=='B':
+                class_ids.append(5)
+            # class_ids = [n['screw'] for n in objects]
+            print(class_ids)
             # load_mask() needs the image size to convert polygons to masks.
             # Unfortunately, VIA doesn't include it in JSON, so we must read
             # the image. This is only managable since the dataset is tiny.
@@ -197,13 +213,13 @@ class ScrewDataset(utils.Dataset):
 def train(model):
     """Train the model."""
     # Training dataset.
-    dataset_train = FoodDataset()
-    dataset_train.load_food(args.dataset, "train")
+    dataset_train = ScrewDataset()
+    dataset_train.load_screw(args.dataset, "train")
     dataset_train.prepare()
 
     # Validation dataset
-    dataset_val = FoodDataset()
-    dataset_val.load_food(args.dataset, "val")
+    dataset_val = ScrewDataset()
+    dataset_val.load_screw(args.dataset, "val")
     dataset_val.prepare()
 
     # *** This training schedule is an example. Update to your needs ***
@@ -333,9 +349,9 @@ if __name__ == '__main__':
 
     # Configurations
     if args.command == "train":
-        config = FoodConfig()
+        config = ScrewConfig()
     else:
-        class InferenceConfig(FoodConfig):
+        class InferenceConfig(ScrewConfig):
             # Set batch size to 1 since we'll be running inference on
             # one image at a time. Batch size = GPU_COUNT * IMAGES_PER_GPU
             GPU_COUNT = 1
