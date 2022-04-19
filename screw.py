@@ -97,6 +97,7 @@ class ScrewDataset(utils.Dataset):
         # Train or validation dataset?
         assert subset in ["train", "val"]
         dataset_dir = os.path.join(dataset_dir, subset)
+        dataset_dir = os.path.abspath(dataset_dir)
 
         # Load annotations
         # VGG Image Annotator (up to version 1.6) saves each image in the form:
@@ -114,6 +115,10 @@ class ScrewDataset(utils.Dataset):
         # }
         # We mostly care about the x and y coordinates of each region
         # Note: In VIA 2.0, regions was changed from a dict to a list.
+        # if(subset=='train'):
+        #   annotations = json.load(open(os.path.join(ROOT_DIR, "dataset/train/points.json")))
+        # else:
+        #   annotations = json.load(open(os.path.join(ROOT_DIR, "dataset/val/points.json")))
         annotations = json.load(open(os.path.join(dataset_dir, "points.json")))
         annotations = list(annotations.values())  # don't need the dict keys
 
@@ -159,7 +164,7 @@ class ScrewDataset(utils.Dataset):
             # print("multi_numbers=", multi_numbers)
             # num_ids = [n for n in multi_numbers['number'].values()]
             # for n in multi_numbers:
-
+            # image_path = os.path.join(ROOT_DIR, dataset_dir+'/'+a['filename'])
             image_path = os.path.join(dataset_dir, a['filename'])
             image = skimage.io.imread(image_path)
             height, width = image.shape[:2]
