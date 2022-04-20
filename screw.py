@@ -115,11 +115,11 @@ class ScrewDataset(utils.Dataset):
         # }
         # We mostly care about the x and y coordinates of each region
         # Note: In VIA 2.0, regions was changed from a dict to a list.
-        # if(subset=='train'):
-        #   annotations = json.load(open(os.path.join(ROOT_DIR, "dataset/train/points.json")))
-        # else:
-        #   annotations = json.load(open(os.path.join(ROOT_DIR, "dataset/val/points.json")))
-        annotations = json.load(open(os.path.join(dataset_dir, "points.json")))
+        if(subset=='train'):
+          annotations = json.load(open(os.path.join(ROOT_DIR, "dataset/train/points.json")))
+        else:
+          annotations = json.load(open(os.path.join(ROOT_DIR, "dataset/val/points.json")))
+        # annotations = json.load(open(os.path.join(dataset_dir, "points.json")))
         annotations = list(annotations.values())  # don't need the dict keys
 
         # The VIA tool saves images in the JSON even if they don't have any
